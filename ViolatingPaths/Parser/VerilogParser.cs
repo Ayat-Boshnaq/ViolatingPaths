@@ -33,11 +33,13 @@ namespace ViolatingPaths.Parser
         private Dictionary<string, Module> parsedModules;
         private Dictionary<string, Gate> predefinedGates;
         private Dictionary<string, string> customModulesNamesType;
+        private Dictionary<string, string> predefinedGatesNamesType;
 
         public VerilogParser(Dictionary<string, Gate> predefinedGates)
         {
             parsedModules = new Dictionary<string, Module>();
             customModulesNamesType = new Dictionary<string, string>();
+            predefinedGatesNamesType = new Dictionary<string, string>();
             this.predefinedGates = predefinedGates;
         }
 
@@ -57,13 +59,15 @@ namespace ViolatingPaths.Parser
 
         private ICircuit BuildCircuit(Module lastModule)
         {
-            List<Tuple<string, string>> edges = BuildCircuitEdges(lastModule);
-            throw new NotImplementedException();
+            (var edges, var regs) = BuildCircuitEdges(lastModule);
+            List<string> vertexes = edges.Select(t => new List<string> { t.Item1, t.Item2 }).SelectMany(l => l).Distinct().ToList();
+            return new Circuit(edges, vertexes, regs, lastModule.GetInputs(), lastModule.GetOutputs());
         }
 
-        private List<Tuple<string, string>> BuildCircuitEdges(Module baseModule)
+        private (List<Tuple<string, string>>, List<string>) BuildCircuitEdges(Module baseModule)
         {
             var edges = new List<Tuple<string, string>>();
+            var regestires = baseModule.Regestries;
             var fetchedModulesNames = new HashSet<string>();
             foreach (var edge in baseModule.Edges)
             {
@@ -77,9 +81,11 @@ namespace ViolatingPaths.Parser
                     {
                         fetchedModulesNames.Add(source);
                         var module = parsedModules[customModulesNamesType[source]];
-                        var innerModuleEdges = BuildCircuitEdges(module);
+                        (var innerModuleEdges, var innerRegs) = BuildCircuitEdges(module);
                         var edgesWithPrefix = AddPrefixToEdges(innerModuleEdges, sourceModuleName);
-                        edges = edges.Concat(edgesWithPrefix).ToList();
+                        edges = edges.Concat(edgesWithPrefix).ToList(); ;
+                        var regestriesWithPrefix = AddPrefixToRegs(innerRegs, sourceModuleName);
+                        regestires = regestires.Concat(regestriesWithPrefix).ToList();
                     }
                     var edgesToRemove = edges.Where(e => e.Item2 == edge.Item1).ToList();
                     var edgesToAdd = edgesToRemove.Select(e => new Tuple<string, string>(e.Item1, edge.Item2));
@@ -95,9 +101,11 @@ namespace ViolatingPaths.Parser
                     {
                         fetchedModulesNames.Add(destination);
                         var module = parsedModules[customModulesNamesType[destination]];
-                        var innerModuleEdges = BuildCircuitEdges(module);
+                        (var innerModuleEdges, var innerRegs) = BuildCircuitEdges(module);
                         var edgesWithPrefix = AddPrefixToEdges(innerModuleEdges, destinationModuleName);
                         edges = edges.Concat(edgesWithPrefix).ToList();
+                        var regestriesWithPrefix = AddPrefixToRegs(innerRegs, destinationModuleName);
+                        regestires = regestires.Concat(regestriesWithPrefix).ToList();
                     }
                     var edgesToRemove = edges.Where(e => e.Item1 == edge.Item2).ToList();
                     var edgesToAdd = edgesToRemove.Select(e => new Tuple<string, string>(edge.Item1, e.Item2));
@@ -112,7 +120,14 @@ namespace ViolatingPaths.Parser
                     edges.Add(edge);
                 }
             }
-            return edges;
+            return (edges, regestires);
+        }
+
+        private List<string> AddPrefixToRegs(List<string> regestries, string destinationModuleName)
+        {
+            return regestries
+                .Select(reg => destinationModuleName + "-_-" + reg)
+                .ToList();
         }
 
         private List<Tuple<string, string>> AddPrefixToEdges(List<Tuple<string, string>> innerModuleEdges, string name)
@@ -251,8 +266,14 @@ namespace ViolatingPaths.Parser
 
             if (predefinedGates.ContainsKey(nodeType))
             {
+                predefinedGatesNamesType.Add(m.Name + "-_-" + nodeName, nodeType);
                 var gate = predefinedGates[nodeType];
-                foreach(var edge in edges)
+                if (gate.IsReg)
+                {
+                    m.AddRegestry(nodeName);   
+                }
+
+                foreach (var edge in edges)
                 {
                     if (gate.GetInputs().Contains(edge.Key))
                     {
@@ -265,7 +286,6 @@ namespace ViolatingPaths.Parser
             } else
             {
                 customModulesNamesType.Add(m.Name + "-_-" + nodeName, nodeType);
-
                 Module internalModule = parsedModules[nodeType];
 
                 foreach (var edge in edges)

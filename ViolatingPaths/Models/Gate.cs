@@ -18,6 +18,8 @@ namespace ViolatingPaths.Models
             this.isReg = isReg;
         }
 
+        public bool IsReg { get => isReg; }
+
         public List<string> GetInputs() => inputs.ToList();
     }
 }

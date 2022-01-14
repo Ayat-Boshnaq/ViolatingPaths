@@ -9,12 +9,13 @@ namespace ViolatingPaths
     {
         static void Main(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length != 3)
             {
                 throw new Exception("wrong number of arguments!!!!");
             }
             var predefinedGatesPath = args[0];
             var netlistPath = args[1];
+            var threshold = Int32.Parse(args[2]);
 
             var dirPath = Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).FullName).FullName).FullName;
 
@@ -26,6 +27,7 @@ namespace ViolatingPaths
 
                 var netlistParser = new VerilogParser(preDefinedGates);
                 ICircuit circuit = netlistParser.Parse(netlistStream);
+                circuit.GetViolatingPaths(threshold);
             }
         }
     }
