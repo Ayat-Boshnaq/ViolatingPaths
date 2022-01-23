@@ -15,10 +15,13 @@ namespace ViolatingPaths
             }
             var predefinedGatesPath = args[0];
             var netlistPath = args[1];
-            var threshold = Int32.Parse(args[2]);
+            var threshold = int.Parse(args[2]);
 
+#if DEBUG
             var dirPath = Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).FullName).FullName).FullName;
-
+#else
+            var dirPath = Directory.GetCurrentDirectory();
+#endif
             using (var preDefinedGatesStream = new StreamReader(Path.Combine(dirPath, predefinedGatesPath)))
             using (var netlistStream = new StreamReader(Path.Combine(dirPath, netlistPath)))
             {
