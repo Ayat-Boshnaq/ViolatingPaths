@@ -2,7 +2,7 @@
   "profiles": {
     "ViolatingPaths": {
       "commandName": "Project",
-      "commandLineArgs": "Examples\\gates.txt Examples\\netlist.v 3"
+      "commandLineArgs": "Examples\\gates.txt Examples\\netlist.v 4"
     }
   }
 }

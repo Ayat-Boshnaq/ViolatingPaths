@@ -1,2 +1,5 @@
-dfnrq4 , D $ CP , Q , true;
-dfnrq1 , D $ CP , Q , false;
+reg1 , N, O, true;
+and1 , A $ B, C, false;
+or1 , A $ B, C, false;
+xor1 , A $ B, C, false;
+not1 , A , B, false;

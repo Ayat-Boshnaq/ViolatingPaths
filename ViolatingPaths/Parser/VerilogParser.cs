@@ -69,6 +69,8 @@ namespace ViolatingPaths.Parser
             var edges = new List<Tuple<string, string>>();
             var regestires = baseModule.Regestries;
             var fetchedModulesNames = new HashSet<string>();
+            var edgesToBeRemoved = new List<Tuple<string, string>>();
+
             foreach (var edge in baseModule.Edges)
             {
                 var sourceModuleName = edge.Item1.Split("-_-")[0];
@@ -89,10 +91,7 @@ namespace ViolatingPaths.Parser
                     }
                     var edgesToRemove = edges.Where(e => e.Item2 == edge.Item1).ToList();
                     var edgesToAdd = edgesToRemove.Select(e => new Tuple<string, string>(e.Item1, edge.Item2));
-                    foreach (var e in edgesToRemove)
-                    {
-                        edges.Remove(e);
-                    }
+                    edgesToBeRemoved = edgesToBeRemoved.Concat(edgesToRemove).ToList();
                     edges = edges.Concat(edgesToAdd).ToList();
                 }
                 else if (customModulesNamesType.ContainsKey(destination))
@@ -109,16 +108,17 @@ namespace ViolatingPaths.Parser
                     }
                     var edgesToRemove = edges.Where(e => e.Item1 == edge.Item2).ToList();
                     var edgesToAdd = edgesToRemove.Select(e => new Tuple<string, string>(edge.Item1, e.Item2));
-                    foreach(var e in edgesToRemove)
-                    {
-                        edges.Remove(e);
-                    }
+                    edgesToBeRemoved = edgesToBeRemoved.Concat(edgesToRemove).ToList();
                     edges = edges.Concat(edgesToAdd).ToList();
 
                 } else
                 {
                     edges.Add(edge);
                 }
+            }
+            foreach (var e in edgesToBeRemoved)
+            {
+                edges.Remove(e);
             }
             return (edges, regestires);
         }
