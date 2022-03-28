@@ -1,0 +1,6 @@
+reg1 , N, O, true;
+reg2 , N, O, true;
+and1 , A $ B, C, false;
+or1 , A $ B, C, false;
+xor1 , A $ B, C, false;
+not1 , A , B, fa

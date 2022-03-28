@@ -178,7 +178,9 @@ namespace ViolatingPaths.Parser
 
         private void HandleWireEdges(Module m)
         {
-            foreach (var wire in m.GetWires())
+            var wires = m.GetWires();
+            
+            foreach (var wire in wires)
             {
                 var edges = m.Edges;
                 var sources = edges.Where(edge => edge.Item2 == wire);
@@ -187,7 +189,7 @@ namespace ViolatingPaths.Parser
                     throw new Exception("wire cannot be an output for multiple gates");
                 }
                 var source = sources.ElementAtOrDefault(0);
-                if (source == default(Tuple<string, string>)) return;
+                if (source == default(Tuple<string, string>)) continue;
 
                 var destinations = edges.Where(edge => edge.Item1 == wire).ToArray();
                 foreach(var edge in destinations)
@@ -198,6 +200,7 @@ namespace ViolatingPaths.Parser
                 edges.Remove(source);
                 m.Edges = edges;
             }
+           
         }
 
         private void HandleWirePattern(string[] subs, Module m)
@@ -229,7 +232,7 @@ namespace ViolatingPaths.Parser
         private string[] GetModulesFromStream(StreamReader stream)
         {
             var text = stream.ReadToEnd();
-            var res = text.Split("endmodule").ToList().Where(module => module != string.Empty);
+            var res = text.Split("endmodule").ToList().Select(module => module.Trim()).Where(module => module != string.Empty);
             return res.ToArray();
         }
 

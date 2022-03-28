@@ -14,6 +14,7 @@ namespace ViolatingPaths
                 throw new Exception("wrong number of arguments!!!!");
             }
             var predefinedGatesPath = args[0];
+            if (predefinedGatesPath == null) throw new Exception("No gates file");
             var netlistPath = args[1];
             var threshold = int.Parse(args[2]);
 

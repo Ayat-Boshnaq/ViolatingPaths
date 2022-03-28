@@ -35,14 +35,14 @@ namespace ViolatingPaths.Models
 
         //*****************************************************************************************************************
 
-        public void GetViolatingPathsAux(int threshold, string vertix, int path_length, List<string> path,
+        public void GetViolatingPathsAux(int threshold, string vertix, List<string> path,
             Dictionary<string, Boolean> visited_regs, List<List<string>> violating_paths)
         {
             //1.the current vertix in the path is a register
             path.Add(vertix);
             if (Regs.Contains(vertix))
             {
-                if (path_length > threshold)
+                if (path.Count - 2 >= threshold)
                 {
                     violating_paths.Add(new List<string>(path));
                 }
@@ -53,7 +53,7 @@ namespace ViolatingPaths.Models
                     {
                         List<string> new_path = new List<string>();
                         new_path.Add(vertix);
-                        GetViolatingPathsAux(threshold, ver, 1, new_path, visited_regs, violating_paths);
+                        GetViolatingPathsAux(threshold, ver, new_path, visited_regs, violating_paths);
                     }
                 }
 
@@ -62,15 +62,16 @@ namespace ViolatingPaths.Models
             else {
                 if (Outputs.Contains(vertix))
                 {
-                    if (path_length > threshold)
+                    if (path.Count - 2 >= threshold)
                     {
-                        if (!Inputs.Contains(path[0]))
-                        {
+                        //if (!Inputs.Contains(path[0]))
+                        //{
                             violating_paths.Add(new List<string>(path));
-                            return;
-                        }
+                          
+                        //}
 
                     }
+                    return;
                 }
 
                 //3.the current vertex is neither a register nor an output
@@ -78,11 +79,11 @@ namespace ViolatingPaths.Models
                 //and continue recursively searching from the next vertix....
                 else
                 {
-                    path_length += 1;
+                    
                     foreach (var ver in graph[vertix])
                     {
                         List<string> new_path = new List<string>(path);
-                        GetViolatingPathsAux(threshold, ver, path_length, new_path, visited_regs, violating_paths);
+                        GetViolatingPathsAux(threshold, ver, new_path, visited_regs, violating_paths);
                     }
                 }
             }
@@ -103,7 +104,7 @@ namespace ViolatingPaths.Models
             foreach (var input in Inputs)
             {
                 List<string> path = new List<string>();
-                GetViolatingPathsAux(threshold, input, 1, path, visited_regs, violating_paths);
+                GetViolatingPathsAux(threshold, input, path, visited_regs, violating_paths);
             }
             Console.WriteLine();
             Console.WriteLine("number of violating paths is :" + violating_paths.Count);
