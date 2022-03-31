@@ -9,6 +9,10 @@ namespace ViolatingPaths
     {
         static void Main(string[] args)
         {
+            MyMain(new string[] { "Examples/gates4.txt", "Examples/netlist5.v", "3" });
+        }
+        static void MyMain(string[] args)
+        {
             if (args.Length != 3)
             {
                 throw new Exception("wrong number of arguments!!!!");
